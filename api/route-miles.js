@@ -1,132 +1,159 @@
-// api/route-miles.js
-// Vercel serverless function — v3.1.1 (ZIP/city/coords autodetect + HighwayOnly logic)
+import { Buffer } from 'buffer';
+
+// Route handler for Vercel/Next API
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
-
   try {
-    const { stops, devKey } = req.body || {};
-    if (!Array.isArray(stops) || stops.length < 2) {
-      return res.status(400).json({ error: 'At least two stops are required.' });
+    const { locations } = req.body || {};
+    if (!Array.isArray(locations) || locations.length < 2) {
+      return res.status(400).json({ ok: false, error: 'Provide at least origin and destination.' });
     }
 
-    const API_KEY = process.env.TRIMBLE_API_KEY || (devKey || '').trim();
+    // Use your Web Services key from env var
+    const API_KEY = process.env.TRIMBLE_API_KEY || '';
     if (!API_KEY) {
-      return res.status(500).json({ error: 'Server API key not configured.' });
+      return res.status(500).json({ ok: false, error: 'Server API key not configured.' });
     }
 
-    // Parse a user-entered stop into the shape Trimble expects (no regex in this function to keep deployment tooling happy)
-    function parseStop(raw) {
-      const s = String(raw).trim();
-
-      // 1) Lat,Lng (e.g., "41.8818, -87.6231")
-      const commaIdx = s.indexOf(',');
-      if (commaIdx !== -1) {
-        const lat = parseFloat(s.slice(0, commaIdx).trim());
-        const lon = parseFloat(s.slice(commaIdx + 1).trim());
-        if (Number.isFinite(lat) && Number.isFinite(lon)) {
-          return { Coords: { Lat: lat, Lon: lon } };
-        }
-      }
-
-      // 2) ZIP (5 or 9 with dash)
-      const digits = s.split('-').join('');
-      const allDigits = digits.length > 0 && digits.split('').every(ch => ch >= '0' && ch <= '9');
-      const isZip5 = s.length === 5 && allDigits && digits.length === 5;
-      const isZip9 = s.length === 10 && s[5] === '-' && allDigits && digits.length === 9;
-      if (isZip5 || isZip9) {
-        return { Address: { Zip: s, Country: 'United States', CountryPostalFilter: 'Us' } };
-      }
-
-      // 3) City, ST (two-letter state)
-      if (s.includes(',')) {
-        const parts = s.split(',');
-        const city = parts[0] ? parts[0].trim() : '';
-        const state = parts[1] ? parts[1].trim().toUpperCase() : '';
-        const isTwoLetters = state.length === 2 && state.split('').every(ch => ch >= 'A' && ch <= 'Z');
-        if (city && isTwoLetters) {
-          return { Address: { City: city, State: state, Country: 'United States' } };
-        }
-      }
-
-      // 4) Fallback to full street address
-      return { Address: { StreetAddress: s } };
-    }
-
-    const parsedStops = stops.map((s, i) => ({ Label: `Stop ${i + 1}`, ...parseStop(s) }));
-
-    // If all stops are ZIP/city-only (no street), HighwayOnly is recommended for rating
-    const isCityOrZipOnly = parsedStops.every(st => st.Address && !st.Address.StreetAddress);
-
-    const body = {
-      ReportRoutes: [
-        {
-          Stops: parsedStops,
-          RouteOptions: {
-            VehicleType: 0,       // Truck
-            RoutingType: 0,       // Practical
-            HighwayOnly: isCityOrZipOnly,
-            DistanceUnits: 0      // Miles
-          },
-          ReportTypes: [
-            { __type: 'MileageReportType:http://pcmiler.alk.com/APIs/v1.0', TimeInSeconds: false },
-            { __type: 'RoutePathReportType:http://pcmiler.alk.com/APIs/v1.0' }
-          ]
-        }
-      ]
+    // Build Stops for routeReports call
+    const stopsForReports = locations.map((loc) => ({
+      Address: { StreetAddress: loc, Country: 'US' },
+      Region: 4, // North America
+    }));
+    // Build body for routeReports (mileage + route path)
+    const reportsBody = {
+      ReportRoutes: [{
+        Stops: stopsForReports,
+        Options: {
+          VehicleType: 0,    // Truck
+          RoutingType: 0,    // Practical
+          DistanceUnits: 0,  // Miles
+          HighwayOnly: false,
+          TollDiscourage: false,
+          HazMatType: 0
+        },
+        ReportTypes: [
+          { __type: 'MileageReportType:http://pcmiler.alk.com/APIs/v1.0', TimeInSeconds: false },
+          { __type: 'RoutePathReportType:http://pcmiler.alk.com/APIs/v1.0' }
+        ]
+      }]
     };
 
-    const resp = await fetch(
+    const reportsResp = await fetch(
       'https://pcmiler.alk.com/apis/rest/v1.0/Service.svc/route/routeReports?dataVersion=Current',
       {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': API_KEY
-        },
-        body: JSON.stringify(body)
+        headers: { 'Content-Type': 'application/json', 'Authorization': API_KEY },
+        body: JSON.stringify(reportsBody)
       }
     );
-
-    if (!resp.ok) {
-      const text = await resp.text();
-      return res.status(resp.status).json({ error: 'Trimble error', details: text });
+    if (!reportsResp.ok) {
+      const text = await reportsResp.text();
+      return res.status(reportsResp.status).json({ ok: false, error: `Trimble error: ${text}` });
     }
+    const reportsData = await reportsResp.json();
 
-    const data = await resp.json();
-
+    // Extract miles and coordinates
     let miles = 0;
-    let geometry = null;
-    let resolvedStops = [];
-
-    const reports = Array.isArray(data) ? data : data?.Reports || [];
-    for (const r of reports) {
+    let routeCoords = [];
+    const reports = Array.isArray(reportsData) ? reportsData : reportsData?.Reports || [];
+    reports.forEach((r) => {
       const type = r.__type || '';
       if (type.includes('MileageReport')) {
         const lines = r.MileageReportLines || r.Lines || [];
-        if (Array.isArray(lines) && lines.length > 0) {
+        if (Array.isArray(lines) && lines.length) {
           const last = lines[lines.length - 1];
-          miles = Number(last?.TMiles) || lines.reduce((acc, L) => acc + (Number(L?.LMiles) || 0), 0);
-          resolvedStops = lines.map(L => ({
-            Label: L?.Stop?.Label || '',
-            Lon: Number(L?.Stop?.Coords?.Lon),
-            Lat: Number(L?.Stop?.Coords?.Lat)
-          })).filter(s => !Number.isNaN(s.Lat) && !Number.isNaN(s.Lon));
+          miles = Number(last?.TMiles) || miles;
         }
       }
       if (type.includes('RoutePathReport')) {
-        if (r?.Geometry?.type === 'LineString' && Array.isArray(r?.Geometry?.coordinates)) {
-          geometry = r.Geometry;
-        } else if (Array.isArray(r?.GeoPoints)) {
-          geometry = { type: 'LineString', coordinates: r.GeoPoints.map(p => [Number(p.Lon), Number(p.Lat)]) };
-        }
+      const points = (r?.Geometry?.coordinates) ? r.Geometry.coordinates :
+                    (r?.Geometry?.type === 'LineString' && Array.isArray(r?.Geometry?.coordinates)) ? r.Geometry.coordinates :
+                    (r?.GeoPoints || []).map((p) => [Number(p.Lon), Number(p.Lat)]);
+        routeCoords = points;
       }
-    }
+    });
 
-    return res.status(200).json({ miles, geometry, stops: resolvedStops });
+    // Build body for static map (Map Routes API)
+    const resolvedStops = routeCoords.length
+      ? routeCoords.map((p, i) => ({
+          Lat: p[1],
+          Lon: p[0]
+        }))
+      : [];
+
+    // Use the stops array to draw pins; fallback to original locations if coords missing
+    const pinPoints = resolvedStops.length
+      ? resolvedStops.map((pt, i) => ({
+          Point: { Lat: pt.Lat, Lon: pt.Lon },
+          Image: i === 0 ? 'ltruck_r' :
+                 (i === resolvedStops.length - 1 ? 'lbldg_bl' : 'waypoint')
+        }))
+      : locations.map((loc, i) => ({
+          Point: { Lat: 0, Lon: 0 },
+          Image: i === 0 ? 'ltruck_r' : (i === locations.length - 1 ? 'lbldg_bl' : 'waypoint')
+        }));
+
+    const mapBody = {
+      Map: {
+        Viewport: {
+          Center: null,
+          ScreenCenter: null,
+          ZoomRadius: 0,
+          CornerA: null,
+          CornerB: null,
+          Region: 0
+        },
+        Projection: 0,
+        Style: 0,
+        ImageOption: 0,
+        Width: 400,
+        Height: 400,
+        Drawers: [8, 2, 7, 17, 15],
+        LegendDrawer: [{ Type: 0, DrawOnMap: true }],
+        GeometryDrawer: null,
+        PinDrawer: { Pins: pinPoints },
+        PinCategories: null,
+        TrafficDrawer: null,
+        MapLayering: 0,
+        Language: null,
+        ImageSource: null
+      },
+      Routes: [{
+        Stops: stopsForReports.map((stop) => ({
+          Address: stop.Address,
+          Coords: null,
+          Region: 4
+        })),
+        Options: {
+          VehicleType: 0,
+          RoutingType: 0,
+          DistanceUnits: 0,
+          HighwayOnly: false,
+          TollDiscourage: false,
+          HazMatType: 0
+        },
+        DrawLeastCost: false,
+        RouteLegOptions: null,
+        StopLabelDrawer: 0
+      }]
+    };
+
+    const mapResp = await fetch(
+      'https://pcmiler.alk.com/apis/rest/v1.0/Service.svc/mapRoutes?dataset=Current',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': API_KEY },
+        body: JSON.stringify(mapBody)
+      }
+    );
+    const imgBuffer = await mapResp.arrayBuffer();
+    const staticMapUrl = `data:image/png;base64,${Buffer.from(imgBuffer).toString('base64')}`;
+
+    return res.status(200).json({ ok: true, miles, staticMapUrl });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Server error', details: String(err) });
+    return res.status(500).json({ ok: false, error: err.message || 'Server error' });
   }
 }
