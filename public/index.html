@@ -9,13 +9,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Caveat:wght@700&family=Merriweather:ital,wght@0,400;0,700;1,400;1,700&family=Roboto:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
-    <!-- Trimble Maps JS SDK (for the interactive map) -->
+
+    <!-- Trimble Maps JS SDK (for interactive maps, if key provided) -->
     <link href="https://maps-sdk.trimblemaps.com/v4/trimblemaps-4.2.3.css" rel="stylesheet" />
     <script src="https://maps-sdk.trimblemaps.com/v4/trimblemaps-4.2.3.js" defer></script>
 
     <script>
         // Apply dark mode immediately from localStorage to prevent flashing
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        if (localStorage.getItem('theme') === 'dark' ||
+            (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
@@ -69,11 +71,11 @@
         .dark .d-pad-btn { background-color: #4b5563; }
         .d-pad-btn:active { background-color: #4b5563; }
         .dark .d-pad-btn:active { background-color: #5a6678; }
-        .up { grid-column: 2; grid-row: 1; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);}
-        .left { grid-column: 1; grid-row: 2; clip-path: polygon(0% 50%, 50% 100%, 100% 50%, 50% 0%);}
+        .up { grid-column: 2; grid-row: 1; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+        .left { grid-column: 1; grid-row: 2; clip-path: polygon(0% 50%, 50% 100%, 100% 50%, 50% 0%); }
         .center { grid-column: 2; grid-row: 2; }
-        .right { grid-column: 3; grid-row: 2; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);}
-        .down { grid-column: 2; grid-row: 3; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);}
+        .right { grid-column: 3; grid-row: 2; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+        .down { grid-column: 2; grid-row: 3; clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
 
         .ab-buttons { display: flex; align-items: center; gap: 0.75rem; }
         .ab-btn {
@@ -121,15 +123,26 @@
             background: #000 !important; border: 4px solid #4ade80 !important;
             box-shadow: none !important; border-radius: 0 !important;
         }
-        .retro-mode .main-title, .retro-mode .font-bold, .retro-mode .gb-text, .retro-mode .mode-btn, .dark.retro-mode .mode-btn {
-            color: #4ade80 !important; text-shadow: 2px 2px #000;
+        .retro-mode .main-title,
+        .retro-mode .font-bold,
+        .retro-mode .gb-text,
+        .retro-mode .mode-btn,
+        .dark.retro-mode .mode-btn {
+            color: #4ade80 !important;
+            text-shadow: 2px 2px #000;
         }
         .retro-mode .mode-btn.active { color: #000 !important; }
-        .retro-mode .form-input, .retro-mode .d-pad-btn, .retro-mode .ab-btn, .retro-mode .action-btn {
+        .retro-mode .form-input,
+        .retro-mode .d-pad-btn,
+        .retro-mode .ab-btn,
+        .retro-mode .action-btn {
             border-radius: 0 !important; border: 2px solid #4ade80 !important;
             background: #000 !important; color: #4ade80 !important;
         }
-        .retro-mode .ab-btn, .retro-mode .action-btn:active { background: #4ade80 !important; color: #000 !important; }
+        .retro-mode .ab-btn,
+        .retro-mode .action-btn:active {
+            background: #4ade80 !important; color: #000 !important;
+        }
         .retro-mode .d-pad-btn { background: #000 !important; border-color: #4ade80 !important; }
         .retro-mode #mode-slider { background-color: #4ade80 !important; }
         .retro-mode hr { border-color: #4ade80 !important; }
@@ -145,7 +158,6 @@
     </style>
 </head>
 <body class="flex items-center justify-center min-h-screen p-4 overflow-x-hidden dark:bg-gray-900">
-
     <!-- Transition Canvas for Retro Mode -->
     <canvas id="transition-canvas" class="fixed inset-0 w-full h-full z-50 pointer-events-none hidden"></canvas>
 
@@ -159,7 +171,9 @@
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold text-[#003366] dark:text-blue-200">Menu</h2>
                     <button id="close-menu-btn" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
                     </button>
                 </div>
                 <nav id="main-menu" class="space-y-2">
@@ -167,25 +181,37 @@
                     <div class="p-3">
                         <label for="apiKeyInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Routing API Key (server)</label>
                         <input type="password" id="apiKeyInput" placeholder="Saved in browser for dev only" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-sm">
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">For production, set <code>TRIMBLE_API_KEY</code> on the server. This field is optional for local tests.</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            For production, set <code>TRIMBLE_API_KEY</code> on the server. This field is optional for local tests.
+                        </p>
                     </div>
                     <!-- Browser key for interactive map -->
                     <div class="p-3">
                         <label for="mapsJsKeyInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Maps JS Key (browser)</label>
                         <input type="text" id="mapsJsKeyInput" placeholder="Used only to render the map" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-sm">
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Best practice: domain‑restrict this key in Trimble console.</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Best practice: domain‑restrict this key in Trimble console.
+                        </p>
                     </div>
                     <a href="#" id="history-menu-btn" class="flex items-center p-3 text-lg text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
                         Recent Calculations
                     </a>
                     <a href="#" id="theme-toggle" class="flex items-center p-3 text-lg text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <svg id="theme-toggle-dark-icon" class="hidden w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
-                        <svg id="theme-toggle-light-icon" class="hidden w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm-.707 10.607a1 1 0 010-1.414l.707-.707a1 1 0 111.414 1.414l-.707.707a1 1 0 01-1.414 0zM3 11a1 1 0 100-2H2a1 1 0 100 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                        <svg id="theme-toggle-dark-icon" class="hidden w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                        </svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm-.707 10.607a1 1 0 010-1.414l.707-.707a1 1 0 111.414 1.414l-.707.707a1 1 0 01-1.414 0zM3 11a1 1 0 100-2H2a1 1 0 100 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+                        </svg>
                         Night Shift
                     </a>
                     <a href="#" id="feedback-menu-btn" class="flex items-center p-3 text-lg text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+                        </svg>
                         Send Feedback
                     </a>
                 </nav>
@@ -202,26 +228,34 @@
             <div id="history-view" class="hidden absolute inset-0 bg-white dark:bg-gray-800 p-5">
                 <div class="flex justify-between items-center mb-4">
                     <button id="back-to-menu-hist" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
                     </button>
                     <h3 class="text-xl font-bold text-center text-[#003366] dark:text-blue-200">History</h3>
                     <div class="w-6"></div>
                 </div>
                 <div id="history-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
-                <button id="clear-history-btn" class="w-full mt-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Clear History</button>
+                <button id="clear-history-btn" class="w-full mt-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                    Clear History
+                </button>
             </div>
             <!-- Feedback View -->
             <div id="feedback-view" class="hidden absolute inset-0 bg-white dark:bg-gray-800 p-5">
                 <div class="flex justify-between items-center mb-4">
                     <button id="back-to-menu-feed" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
                     </button>
                     <h3 class="text-xl font-bold text-center text-[#003366] dark:text-blue-200">Feedback</h3>
                     <div class="w-6"></div>
                 </div>
                 <form id="feedback-form" class="space-y-4">
                     <textarea id="feedback-message" placeholder="Your feedback..." rows="5" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"></textarea>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Send</button>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Send
+                    </button>
                 </form>
             </div>
         </div>
@@ -231,17 +265,22 @@
     <div id="calculator-ui" class="w-full max-w-sm mx-auto p-4 rounded-2xl shadow-2xl border-4 border-gray-400 dark:border-gray-500">
         <div class="flex justify-between items-center">
             <button id="open-menu-btn" type="button" class="p-1 gb-text rounded-lg">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
             </button>
-            <h1 id="main-title" class="main-title text-center text-sm gb-text">Thompson Transportation</h1>
+            <h1 id="main-title" class="main-title text-center text-sm gb-text">
+                Thompson Transportation
+            </h1>
             <div class="w-6"></div>
         </div>
-
         <!-- Screen Area -->
         <div id="map-container" class="my-2 rounded-lg aspect-square flex items-center justify-center">
             <img id="map-image" src="" alt="Route map" class="object-contain h-full w-full rounded-lg hidden">
             <div id="map-loader" class="spinner hidden"></div>
-            <span id="map-placeholder" class="gb-text">Route map will be displayed here</span>
+            <span id="map-placeholder" class="gb-text">
+                Route map will be displayed here
+            </span>
         </div>
 
         <form id="rateCalculatorForm" onsubmit="return false;">
@@ -258,7 +297,7 @@
                 <div id="pcmiler-inputs" class="space-y-1 hidden">
                     <input type="text" id="stop1" placeholder="Origin" class="form-input editable-field w-full p-1.5 text-sm font-semibold border-2 rounded-lg shadow-inner">
                     <input type="text" id="stop2" placeholder="P/U Location" class="form-input editable-field w-full p-1.5 text-sm font-semibold border-2 rounded-lg shadow-inner">
-                    <input type="text" id="stop3" placeholder "Del. Location" class="form-input editable-field w-full p-1.5 text-sm font-semibold border-2 rounded-lg shadow-inner">
+                    <input type="text" id="stop3" placeholder="Del. Location" class="form-input editable-field w-full p-1.5 text-sm font-semibold border-2 rounded-lg shadow-inner">
                     <div class="flex items-center justify-between pt-1">
                         <label class="font-bold text-sm gb-text">Total Miles</label>
                         <input type="number" id="total-miles-output" readonly class="form-input output-field w-24 p-1.5 text-sm text-right font-semibold border-2 rounded-lg shadow-inner">
@@ -323,7 +362,9 @@
             </div>
             <p id="api-error" class="text-red-800 text-sm text-center mt-2 hidden"></p>
             <div id="copyNotification" class="text-center text-green-700 dark:text-green-400 font-semibold mt-2 h-6 opacity-0 transition-opacity duration-300"></div>
-            <button type="button" id="manual-mode-btn" class="text-xs gb-text hover:underline text-center w-full mt-2">Switch to Route Planner</button>
+            <button type="button" id="manual-mode-btn" class="text-xs gb-text hover:underline text-center w-full mt-2">
+                Switch to Route Planner
+            </button>
         </form>
     </div>
 
@@ -344,7 +385,7 @@
             <p class="mb-2 text-lg"><strong class="w-48 inline-block">FSC (%):</strong> <span id="print-fsc"></span></p>
             <hr class="my-4">
             <p class="mb-2 text-lg" id="print-your-rate-row"><strong class="w-48 inline-block"></strong> <span id="print-your-rate"></span></p>
-            <p class="mb-2 text-lg" id="print-offer-row"><strong class "w-48 inline-block"></strong> <span id "print-offer"></span></p>
+            <p class="mb-2 text-lg" id="print-offer-row"><strong class="w-48 inline-block"></strong> <span id="print-offer"></span></p>
             <hr class="my-4">
             <p class="mb-2 text-lg"><strong class="w-48 inline-block">FSC Total:</strong> <span id="print-fsc-total"></span></p>
             <p class="text-xl font-bold mt-4"><strong class="w-48 inline-block">Final Total:</strong> <span id="print-final-total"></span></p>
@@ -409,7 +450,12 @@
         const mapImage = document.getElementById('map-image');
         const apiError = document.getElementById('api-error');
 
-        // --- New: Hide server/browser key inputs in production and auto-load map key ---
+        // --- State Management ---
+        let currentMode = 'generateQuote';
+        let calculationHistory = JSON.parse(localStorage.getItem('thompsonCalcHistory_v3')) || [];
+        let personalCalcCount = parseInt(localStorage.getItem('thompsonPersonalCalcCount_v3')) || 0;
+
+        // --- New: hide server/browser key inputs in production and load map key automatically ---
         const isProd = !location.hostname.includes('localhost');
         const serverKeySection = apiKeyInput.closest('.p-3');
         const mapsKeySection = mapsJsKeyInput.closest('.p-3');
@@ -421,25 +467,20 @@
                     if (mapsKey) {
                         mapsJsKeyInput.value = mapsKey;
                         localStorage.setItem('trimbleMapsBrowserKey', mapsKey);
-                        // Hide browser key field when loaded from server
+                        // hide the browser key input when loaded from server
                         mapsKeySection.style.display = 'none';
                     }
                 }
             } catch {}
             if (isProd) {
+                // hide the server key input entirely in production
                 serverKeySection.style.display = 'none';
             }
         }
 
-        // --- State Management ---
-        let currentMode = 'generateQuote';
-        let calculationHistory = JSON.parse(localStorage.getItem('thompsonCalcHistory_v3')) || [];
-        let personalCalcCount = parseInt(localStorage.getItem('thompsonPersonalCalcCount_v3')) || 0;
-
         // --- Easter Eggs & Special Effects ---
         const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
         let konamiIndex = 0;
-
         async function playRetroMusic() {
             try {
                 await Tone.start();
@@ -454,7 +495,6 @@
                 console.error('Tone.js could not start. User interaction might be required.', e);
             }
         }
-
         async function playPowerDownSound() {
             try {
                 await Tone.start();
@@ -468,7 +508,6 @@
                 console.error('Tone.js could not start.', e);
             }
         }
-
         function runAcidRain() {
             transitionCanvas.classList.remove('hidden');
             const ctx = transitionCanvas.getContext('2d');
@@ -507,7 +546,6 @@
                 }, 50);
             }, 2000);
         }
-
         function handleKonami(key) {
             if (key === konamiCode[konamiIndex]) {
                 konamiIndex++;
@@ -525,7 +563,6 @@
                 konamiIndex = 0;
             }
         }
-
         let hornClickCount = 0;
         let hornTimeout;
         function handleHornClick() {
@@ -551,7 +588,6 @@
             sideMenu.classList.remove('-translate-x-full');
             menuOverlay.classList.remove('hidden');
         }
-
         function closeMenu() {
             sideMenu.classList.add('-translate-x-full');
             menuOverlay.classList.add('hidden');
@@ -559,12 +595,10 @@
             historyView.classList.add('hidden');
             feedbackView.classList.add('hidden');
         }
-
         function updateThemeIcon(isDarkMode) {
             themeToggleDarkIcon.classList.toggle('hidden', !isDarkMode);
             themeToggleLightIcon.classList.toggle('hidden', isDarkMode);
         }
-
         function toggleTheme(e) {
             e.preventDefault();
             document.documentElement.classList.toggle('dark');
@@ -572,18 +606,23 @@
             localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
             updateThemeIcon(isDarkMode);
         }
-
         function updatePersonalCounterDisplay() {
             personalCalcCounter.textContent = personalCalcCount.toLocaleString();
         }
-
         function saveCalculation() {
             const isRoutePlannerMode = !pcmilerInputs.classList.contains('hidden');
             const currentMiles = isRoutePlannerMode ? totalMilesOutput.value : milesInput.value;
             const pInput = parseFloat(primaryInput.value) || 0;
             const miles = parseFloat(currentMiles) || 0;
             if (pInput > 0 && miles > 0) {
-                const calculation = { mode: currentMode, primaryInput: primaryInput.value, miles: currentMiles, tonnage: tonnageInput.value, fsc: fscInput.value, timestamp: new Date().toISOString() };
+                const calculation = {
+                    mode: currentMode,
+                    primaryInput: primaryInput.value,
+                    miles: currentMiles,
+                    tonnage: tonnageInput.value,
+                    fsc: fscInput.value,
+                    timestamp: new Date().toISOString()
+                };
                 calculationHistory.unshift(calculation);
                 calculationHistory = calculationHistory.slice(0, 10);
                 localStorage.setItem('thompsonCalcHistory_v3', JSON.stringify(calculationHistory));
@@ -592,7 +631,6 @@
                 updatePersonalCounterDisplay();
             }
         }
-
         function renderHistory() {
             historyList.innerHTML = '';
             if (calculationHistory.length === 0) {
@@ -608,7 +646,6 @@
                 historyList.appendChild(button);
             });
         }
-
         function loadFromHistory(index) {
             const calc = calculationHistory[index];
             setMode(calc.mode);
@@ -619,7 +656,6 @@
             fscInput.value = calc.fsc;
             calculate();
         }
-
         function handleFeedbackSubmit(e) {
             e.preventDefault();
             const message = document.getElementById('feedback-message').value;
@@ -662,7 +698,6 @@
             }, 150);
             resetCalculator();
         }
-
         function calculate() {
             const isRoutePlannerMode = !pcmilerInputs.classList.contains('hidden');
             const currentMiles = isRoutePlannerMode ? totalMilesOutput.value : milesInput.value;
@@ -687,7 +722,6 @@
             animateValue(fscTotal, fscAmount);
             animateValue(finalTotal, total);
         }
-
         function animateValue(element, end) {
             let start = parseFloat(element.value.replace(/[^0-9.-]+/g,"")) || 0;
             if (Math.abs(start - end) < 0.01) {
@@ -709,11 +743,16 @@
             };
             window.requestAnimationFrame(step);
         }
-
         function getSummaryText(calcData = null) {
             const isRoutePlannerMode = !pcmilerInputs.classList.contains('hidden');
             const currentMiles = isRoutePlannerMode ? totalMilesOutput.value : milesInput.value;
-            const data = calcData || { mode: currentMode, primaryInput: primaryInput.value, miles: currentMiles, tonnage: tonnageInput.value, fsc: fscInput.value };
+            const data = calcData || {
+                mode: currentMode,
+                primaryInput: primaryInput.value,
+                miles: currentMiles,
+                tonnage: tonnageInput.value,
+                fsc: fscInput.value
+            };
             const pInput = parseFloat(data.primaryInput) || 0;
             const miles = parseFloat(data.miles) || 0;
             const tonnage = parseFloat(data.tonnage) || 23;
@@ -750,9 +789,16 @@
                     offerValue = `$${pInput.toFixed(2)} (Flat)`;
                 }
             }
-            return { yourRateLabel, yourRateValue, offerLabel, offerValue, modeLabel, fscTotal: fscAmount.toFixed(2), finalTotal: total.toFixed(2) };
+            return {
+                yourRateLabel,
+                yourRateValue,
+                offerLabel,
+                offerValue,
+                modeLabel,
+                fscTotal: fscAmount.toFixed(2),
+                finalTotal: total.toFixed(2)
+            };
         }
-
         function resetCalculator() {
             form.reset();
             tonnageInput.value = (currentMode === 'calculateFromFlat') ? '' : 23;
@@ -807,48 +853,96 @@
             await loadPublicConfigIfAny();
             // Load API key from local storage
             apiKeyInput.value = localStorage.getItem('pcmilerApiKey') || '';
-            // Check which mode (manual/route) to display based on key
+            // Check which mode (manual/route) to display
             checkApiOrManual();
             // Update the calculation counter display
             updatePersonalCounterDisplay();
-            // Set the initial theme based on user preference or system settings
+            // Set initial theme
             const savedTheme = localStorage.getItem('theme');
             const isDarkMode = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
             if (isDarkMode) document.documentElement.classList.add('dark');
             updateThemeIcon(isDarkMode);
-            // Set the initial calculation mode to 'Generate Quote'
+            // Set the initial calculation mode
             setMode('generateQuote');
 
-            // Attach all event listeners
+            // Attach event listeners
             openMenuBtn.addEventListener('click', openMenu);
             closeMenuBtn.addEventListener('click', closeMenu);
             menuOverlay.addEventListener('click', closeMenu);
-            historyMenuBtn.addEventListener('click', (e) => { e.preventDefault(); mainMenu.classList.add('hidden'); historyView.classList.remove('hidden'); renderHistory(); });
-            feedbackMenuBtn.addEventListener('click', (e) => { e.preventDefault(); mainMenu.classList.add('hidden'); feedbackView.classList.remove('hidden'); });
-            backToMenuHist.addEventListener('click', () => { historyView.classList.add('hidden'); mainMenu.classList.remove('hidden'); });
-            backToMenuFeed.addEventListener('click', () => { feedbackView.classList.add('hidden'); mainMenu.classList.remove('hidden'); });
+            historyMenuBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                mainMenu.classList.add('hidden');
+                historyView.classList.remove('hidden');
+                renderHistory();
+            });
+            feedbackMenuBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                mainMenu.classList.add('hidden');
+                feedbackView.classList.remove('hidden');
+            });
+            backToMenuHist.addEventListener('click', () => {
+                historyView.classList.add('hidden');
+                mainMenu.classList.remove('hidden');
+            });
+            backToMenuFeed.addEventListener('click', () => {
+                feedbackView.classList.add('hidden');
+                mainMenu.classList.remove('hidden');
+            });
             themeToggleBtn.addEventListener('click', toggleTheme);
-            clearHistoryBtn.addEventListener('click', () => { calculationHistory = []; localStorage.removeItem('thompsonCalcHistory_v3'); renderHistory(); });
+            clearHistoryBtn.addEventListener('click', () => {
+                calculationHistory = [];
+                localStorage.removeItem('thompsonCalcHistory_v3');
+                renderHistory();
+            });
             feedbackForm.addEventListener('submit', handleFeedbackSubmit);
             resetButton.addEventListener('click', resetCalculator);
-            document.querySelector('.ab-btn[data-key="b"]').addEventListener('click', (e) => { e.preventDefault(); resetCalculator(); });
+            document.querySelector('.ab-btn[data-key="b"]').addEventListener('click', (e) => {
+                e.preventDefault();
+                resetCalculator();
+            });
             mainTitle.addEventListener('click', handleHornClick);
             window.addEventListener('keydown', (e) => handleKonami(e.key));
-            document.querySelectorAll('.d-pad-btn, .ab-btn').forEach(btn => { btn.addEventListener('click', () => handleKonami(btn.dataset.key)); });
-            modeButtons.forEach(button => { button.addEventListener('click', (e) => { e.preventDefault(); setMode(button.dataset.mode); }); });
-            [primaryInput, milesInput, tonnageInput, fscInput, totalMilesOutput].forEach(input => input.addEventListener('input', calculate));
+            document.querySelectorAll('.d-pad-btn, .ab-btn').forEach(btn => {
+                btn.addEventListener('click', () => handleKonami(btn.dataset.key));
+            });
+            modeButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    setMode(button.dataset.mode);
+                });
+            });
+            [primaryInput, milesInput, tonnageInput, fscInput, totalMilesOutput].forEach(input => {
+                input.addEventListener('input', calculate);
+            });
             let saveTimeout;
-            form.addEventListener('input', () => { clearTimeout(saveTimeout); saveTimeout = setTimeout(saveCalculation, 1500); });
+            form.addEventListener('input', () => {
+                clearTimeout(saveTimeout);
+                saveTimeout = setTimeout(saveCalculation, 1500);
+            });
             copyButton.addEventListener('click', handleCopy);
             emailButton.addEventListener('click', handleEmail);
             printButton.addEventListener('click', handlePrint);
-            calculateRouteBtn.addEventListener('click', (e) => { e.preventDefault(); if (!pcmilerInputs.classList.contains('hidden')) { getRouteMiles(); } });
-            apiKeyInput.addEventListener('input', () => { localStorage.setItem('pcmilerApiKey', apiKeyInput.value); checkApiOrManual(); });
-            manualModeBtn.addEventListener('click', () => { pcmilerInputs.classList.toggle('hidden'); manualMilesInput.classList.toggle('hidden'); checkApiOrManual(); });
+            calculateRouteBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (!pcmilerInputs.classList.contains('hidden')) {
+                    getRouteMiles();
+                }
+            });
+            apiKeyInput.addEventListener('input', () => {
+                localStorage.setItem('pcmilerApiKey', apiKeyInput.value);
+                checkApiOrManual();
+            });
+            manualModeBtn.addEventListener('click', () => {
+                pcmilerInputs.classList.toggle('hidden');
+                manualMilesInput.classList.toggle('hidden');
+                checkApiOrManual();
+            });
         }
 
+        // --- Improved checkApiOrManual: enable Route Planner in production ---
         function checkApiOrManual() {
-            const hasKey = apiKeyInput.value.trim().length > 0;
+            // In production, assume the server key is set so Route Planner can be used even if the input is blank.
+            const hasKey = isProd || apiKeyInput.value.trim().length > 0;
             const manualIsHidden = manualMilesInput.classList.contains('hidden');
             if (hasKey && manualIsHidden) {
                 pcmilerInputs.classList.remove('hidden');
@@ -895,18 +989,22 @@
             copyNotification.style.opacity = '1';
             setTimeout(() => { copyNotification.style.opacity = '0'; }, 2000);
         }
-
         function handleEmail() {
             const { offerValue } = getSummaryText();
             const subject = 'Freight Quote';
             const body = `Hello,\n\nFollowing up on your request, here is our all-inclusive quote for the lane:\n\nRate: ${offerValue}\n\nPlease let us know if you have any questions.\n\nThank you,\nThompson Transportation`;
             window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         }
-
         function handlePrint() {
             const isRoutePlannerMode = !pcmilerInputs.classList.contains('hidden');
             const currentMiles = isRoutePlannerMode ? totalMilesOutput.value : milesInput.value;
-            const data = { mode: currentMode, primaryInput: primaryInput.value, miles: currentMiles, tonnage: tonnageInput.value, fsc: fscInput.value };
+            const data = {
+                mode: currentMode,
+                primaryInput: primaryInput.value,
+                miles: currentMiles,
+                tonnage: tonnageInput.value,
+                fsc: fscInput.value
+            };
             const { yourRateLabel, yourRateValue, offerLabel, offerValue, modeLabel, fscTotal, finalTotal } = getSummaryText(data);
             document.getElementById('print-date').textContent = new Date().toLocaleDateString();
             document.getElementById('print-mode').textContent = modeLabel;
