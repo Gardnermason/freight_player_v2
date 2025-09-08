@@ -9,6 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Caveat:wght@700&family=Merriweather:ital,wght@0,400;0,700;1,400;1,700&family=Roboto:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="https://maps.trimblemaps.com/maps-sdk/css/trimblemaps-sdk.css" />
+    <script src="https://maps.trimblemaps.com/maps-sdk/js/trimblemaps-sdk.js"></script>
     <script>
         // Apply dark mode immediately from localStorage to prevent flashing
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -61,7 +64,7 @@
         @media print { body, html { background-color: white !important; } #calculator-ui, #side-menu, #menu-overlay { display: none !important; } .print-area { display: block !important; position: absolute; top: 0; left: 0; width: 100%; } .print-area-content { background-color: white !important; color: black !important; -webkit-print-color-adjust: exact; color-adjust: exact; } .print-area-content * { color: black !important; } }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4 overflow-x-hidden">
+<body class="flex flex-col items-center justify-center min-h-screen p-4 overflow-x-hidden">
 
     <canvas id="transition-canvas" class="fixed inset-0 w-full h-full z-50 pointer-events-none hidden"></canvas>
 
@@ -96,7 +99,7 @@
             <div class="mt-auto p-4 border-t border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold text-center text-[#003366] dark:text-blue-200">Calculation Counter</h3>
                 <p id="personal-calc-counter" class="text-4xl font-bold text-center text-blue-600 dark:text-blue-400 mt-2">0</p>
-                <p class="text-center text-xs text-gray-400 dark:text-gray-500 mt-2">Version 2.4</p>
+                <p class="text-center text-xs text-gray-400 dark:text-gray-500 mt-2">Version 2.5</p>
             </div>
             <div id="history-view" class="hidden absolute inset-0 bg-white dark:bg-gray-800 p-5">
                  <div class="flex justify-between items-center mb-4">
@@ -225,6 +228,9 @@
         </form>
     </div>
 
+    <div id="mapContainer" class="w-full max-w-lg mx-auto mt-8 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.2)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] overflow-hidden hidden">
+        <div id='myMap' style='width: 100%; height: 450px;'></div>
+    </div>
     <div class="print-area hidden">
         <div class="print-area-content p-8">
             <h1 class="text-2xl font-bold mb-2">Thompson Transportation</h1>
@@ -297,6 +303,7 @@
         let currentMode = 'generateQuote';
         let calculationHistory = JSON.parse(localStorage.getItem('thompsonCalcHistory')) || [];
         let personalCalcCount = parseInt(localStorage.getItem('thompsonPersonalCalcCount')) || 0;
+        let map; // This will hold the map object
 
         // --- Konami Code & Sound Logic ---
         const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
@@ -448,7 +455,7 @@
             personalCalcCounter.textContent = personalCalcCount.toLocaleString();
         }
         
-        // --- PC*MILER API INTEGRATION ---
+        // --- PC*MILER API & MAP INTEGRATION ---
         const PCMILER_API_KEY = 'C9EC4E502D8E6349AB91A8FF5BA8C66F';
         
         async function getAndCalculateMiles() {
@@ -486,6 +493,7 @@
 
                 milesInput.value = Math.round(totalMiles);
                 calculate();
+                plotRouteOnMap();
 
             } catch (error) {
                 console.error("Error fetching mileage:", error);
@@ -494,6 +502,61 @@
             } finally {
                 calculateMilesBtn.disabled = false;
                 calculateMilesBtn.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13V7m0 13a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h2a2 2 0 012 2zm10 0l5.447-2.724A1 1 0 0021 16.382V5.618a1 1 0 00-1.447-.894L15 7m0 13V7m0 13a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2a2 2 0 00-2 2z"></path></svg> Calculate Miles`;
+            }
+        }
+
+        async function plotRouteOnMap() {
+            const origin = originInput.value.trim();
+            const pickup = pickupInput.value.trim();
+            const delivery = deliveryInput.value.trim();
+
+            document.getElementById('mapContainer').classList.remove('hidden');
+            TrimbleMaps.setAPIKey(PCMILER_API_KEY);
+
+            if (!map) {
+                map = new TrimbleMaps.Map({
+                    container: 'myMap',
+                    style: TrimbleMaps.Common.Style.TRANSPORTATION,
+                    center: [-98.5795, 39.8283],
+                    zoom: 3
+                });
+            }
+
+            const stops = `${origin};${pickup};${delivery}`;
+            const routeApiUrl = `https://api.trimblemaps.com/routing/v1/route-reports?stops=${encodeURIComponent(stops)}&reports=routePath`;
+
+            try {
+                const response = await fetch(routeApiUrl, {
+                    headers: { 'Authorization': PCMILER_API_KEY }
+                });
+                const routeData = await response.json();
+                
+                const routeGeometry = routeData[0].RoutePath;
+                const routeGeoJSON = TrimbleMaps.util.routePathToGeoJSON(routeGeometry);
+                
+                if (map.getSource('route')) {
+                    map.removeLayer('route-layer');
+                    map.removeSource('route');
+                }
+
+                map.addSource('route', {
+                    'type': 'geojson',
+                    'data': routeGeoJSON
+                });
+
+                map.addLayer({
+                    'id': 'route-layer',
+                    'type': 'line',
+                    'source': 'route',
+                    'layout': { 'line-join': 'round', 'line-cap': 'round' },
+                    'paint': { 'line-color': '#3b82f6', 'line-width': 8 }
+                });
+
+                const bounds = TrimbleMaps.util.calculateBounds(routeGeoJSON);
+                map.fitBounds(bounds, { padding: 50 });
+
+            } catch (error) {
+                console.error("Error plotting route on map:", error);
             }
         }
 
@@ -698,7 +761,7 @@
         }
 
         // --- Event Listeners ---
-        [primaryInput, milesInput, tonnageInput, fscInput].forEach(input => input.addEventListener('input', calculate));
+        [primaryInput, tonnageInput, fscInput].forEach(input => input.addEventListener('input', calculate));
         
         modeButtons.forEach(button => {
             button.addEventListener('click', () => setMode(button.dataset.mode));
@@ -710,6 +773,7 @@
             form.reset(); 
             originInput.value = ''; pickupInput.value = ''; deliveryInput.value = '';
             tonnageInput.value = 23;
+            document.getElementById('mapContainer').classList.add('hidden');
             calculate();
         });
 
