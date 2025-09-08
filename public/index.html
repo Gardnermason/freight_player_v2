@@ -63,13 +63,89 @@
 </head>
 <body class="flex items-center justify-center min-h-screen p-4 overflow-x-hidden">
 
+    <canvas id="transition-canvas" class="fixed inset-0 w-full h-full z-50 pointer-events-none hidden"></canvas>
+
+    <div id="menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+    <div id="side-menu" class="fixed top-0 left-0 h-full w-80 bg-white dark:bg-gray-800 shadow-xl z-40 transform -translate-x-full">
+        <div class="p-5 flex flex-col h-full">
+            <div>
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-[#003366] dark:text-blue-200">Menu</h2>
+                    <button id="close-menu-btn" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <nav id="main-menu">
+                    <a href="#" id="history-menu-btn" class="flex items-center p-3 text-lg text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Recent Calculations
+                    </a>
+                    <a href="#" id="theme-toggle" class="flex items-center p-3 text-lg text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                        <svg id="theme-toggle-light-icon" class="hidden w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm-.707 10.607a1 1 0 010-1.414l.707-.707a1 1 0 111.414 1.414l-.707.707a1 1 0 01-1.414 0zM3 11a1 1 0 100-2H2a1 1 0 100 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                        Night Shift
+                    </a>
+                    <a href="#" id="feedback-menu-btn" class="flex items-center p-3 text-lg text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                         <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+                        Send Feedback
+                    </a>
+                </nav>
+            </div>
+            <div class="flex-grow"></div>
+            <div class="mt-auto p-4 border-t border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-center text-[#003366] dark:text-blue-200">Calculation Counter</h3>
+                <p id="personal-calc-counter" class="text-4xl font-bold text-center text-blue-600 dark:text-blue-400 mt-2">0</p>
+                <p class="text-center text-xs text-gray-400 dark:text-gray-500 mt-2">Version 2.4</p>
+            </div>
+            <div id="history-view" class="hidden absolute inset-0 bg-white dark:bg-gray-800 p-5">
+                 <div class="flex justify-between items-center mb-4">
+                    <button id="back-to-menu-hist" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <h3 class="text-xl font-bold text-center text-[#003366] dark:text-blue-200">History</h3>
+                    <div class="w-6"></div>
+                </div>
+                <div id="history-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
+                <button id="clear-history-btn" class="w-full mt-4 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Clear History</button>
+            </div>
+            <div id="feedback-view" class="hidden absolute inset-0 bg-white dark:bg-gray-800 p-5">
+                <div class="flex justify-between items-center mb-4">
+                    <button id="back-to-menu-feed" class="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    </button>
+                    <h3 class="text-xl font-bold text-center text-[#003366] dark:text-blue-200">Feedback</h3>
+                    <div class="w-6"></div>
+                </div>
+                <form id="feedback-form" class="space-y-4">
+                    <textarea id="feedback-message" placeholder="Your feedback..." rows="5" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"></textarea>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div id="calculator-ui" class="w-full max-w-lg mx-auto bg-white/30 dark:bg-black/20 backdrop-blur-lg border border-white/50 dark:border-white/10 p-8 rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.2)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-all duration-300">
         
         <div class="flex justify-between items-center mb-4">
+            <div class="w-8">
+                <button id="open-menu-btn" type="button" class="p-1 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
             </div>
+            <div class="text-center">
+                <h2 id="main-title" class="main-title text-3xl font-bold">Thompson Transportation</h2>
+                <h1 class="calculator-title text-5xl font-bold text-[#003366] dark:text-blue-200 mt-1">Freight Calculator</h1>
+            </div>
+            <div class="w-8"></div>
+        </div>
 
         <div id="mode-selector-container" class="relative grid grid-cols-3 gap-2 mb-6 p-1 rounded-lg">
-            </div>
+            <div id="mode-slider" class="absolute top-1 bottom-1 left-1 w-1/3 rounded-md"></div>
+            <button type="button" data-mode="generateQuote" class="mode-btn py-2 px-1 rounded-md text-sm sm:text-base">Generate Quote</button>
+            <button type="button" data-mode="calculateFromTon" class="mode-btn py-2 px-1 rounded-md text-sm sm:text-base">Calc from Ton</button>
+            <button type="button" data-mode="calculateFromFlat" class="mode-btn py-2 px-1 rounded-md text-sm sm:text-base">Calc from Flat</button>
+        </div>
 
         <form id="rateCalculatorForm" class="space-y-5">
             
@@ -79,7 +155,7 @@
                     <div class="relative w-48"><span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 dark:text-gray-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01"></path></svg></span><input type="number" id="primaryInput" step="0.01" placeholder="e.g., 3.50" class="form-input editable-field w-full p-3 pl-10 text-lg text-right font-semibold border-2 rounded-lg shadow-inner"></div>
                 </div>
             </div>
-            
+
             <div class="space-y-4 pt-4 border-t-2 border-gray-300 dark:border-gray-600">
                 <div class="flex items-center justify-between space-x-4">
                     <label for="origin" class="input-label text-xl">Origin</label>
@@ -100,44 +176,74 @@
                     </button>
                 </div>
             </div>
-            
             <div class="flex items-center justify-between space-x-4">
                 <label for="miles" class="input-label">Total Miles</label>
                 <div class="relative w-48"><span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 dark:text-gray-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 3v18m8-18v18m-4-6h.01M10 9h.01M14 6h.01M14 15h.01"></path></svg></span><input type="number" id="miles" readonly class="form-input output-field w-full p-3 pl-10 text-lg text-right font-semibold border-2 rounded-lg shadow-inner cursor-not-allowed"></div>
             </div>
-            
             <div class="flex items-center justify-between space-x-4">
                 <label for="tonnage" class="input-label">Tonnage</label>
                 <div class="relative w-48"><span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 dark:text-gray-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 20V12a6 6 0 1112 0v8m-12 0h12m-9-14V5a3 3 0 016 0v1"></path></svg></span><input type="number" id="tonnage" step="0.1" value="23" class="form-input editable-field w-full p-3 pl-10 text-lg text-right font-semibold border-2 rounded-lg shadow-inner"></div>
             </div>
-            
             <div class="flex items-center justify-between space-x-4">
                 <label for="fsc" class="input-label">FSC (%)</label>
                 <div class="relative w-48"><span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 dark:text-gray-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg></span><input type="number" id="fsc" placeholder="e.g., 10" class="form-input editable-field w-full p-3 pl-10 text-lg text-right font-semibold border-2 rounded-lg shadow-inner"></div>
             </div>
-            
+
             <hr class="border-t-2 border-gray-300 dark:border-gray-600 my-5">
             
             <div class="flex items-center justify-between space-x-4">
                 <label for="primaryOutput" id="primaryOutputLabel" class="output-label transition-opacity duration-300">Quote ($/Ton)</label>
                 <div class="relative w-48"><span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 dark:text-gray-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01"></path></svg></span><input type="text" id="primaryOutput" readonly class="form-input output-field w-full p-3 pl-10 text-lg text-right border-2 rounded-lg shadow-inner cursor-not-allowed"></div>
             </div>
-            
             <div class="flex items-center justify-between space-x-4">
                 <label for="fscTotal" class="output-label">FSC Total</label>
                 <div class="relative w-48"><span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 dark:text-gray-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01"></path></svg></span><input type="text" id="fscTotal" readonly class="form-input output-field w-full p-3 pl-10 text-lg text-right border-2 rounded-lg shadow-inner cursor-not-allowed"></div>
             </div>
-            
             <div class="flex items-center justify-between space-x-4">
                 <label for="finalTotal" class="output-label">Final Total</label>
                 <div class="relative w-48"><span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 dark:text-gray-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01"></path></svg></span><input type="text" id="finalTotal" readonly class="form-input output-field w-full p-3 pl-10 text-lg text-right border-2 rounded-lg shadow-inner cursor-not-allowed"></div>
             </div>
-            
             <div class="flex items-center justify-center space-x-2 pt-5">
-                </div>
+                <button type="button" id="emailButton" class="action-btn btn-email">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    Email
+                </button>
+                <button type="button" id="printButton" class="action-btn btn-print hidden">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    Print
+                </button>
+                <button type="button" id="copyButton" class="action-btn btn-copy">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                    Copy
+                </button>
+                <button type="button" id="resetButton" class="action-btn btn-reset">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Reset
+                </button>
+            </div>
             <div id="copyNotification" class="text-center text-green-700 dark:text-green-400 font-semibold mt-2 h-6 opacity-0 transition-opacity duration-300"></div>
         </form>
     </div>
+
+    <div class="print-area hidden">
+        <div class="print-area-content p-8">
+            <h1 class="text-2xl font-bold mb-2">Thompson Transportation</h1>
+            <h2 class="text-xl font-semibold mb-6 border-b pb-2">Freight Calculation Summary</h2>
+            <p class="mb-2 text-lg"><strong class="w-48 inline-block">Date:</strong> <span id="print-date"></span></p>
+            <p class="mb-2 text-lg"><strong class="w-48 inline-block">Calculation Mode:</strong> <span id="print-mode"></span></p>
+            <p class="mb-2 text-lg"><strong class="w-48 inline-block">Total Miles:</strong> <span id="print-miles"></span></p>
+            <p class="mb-2 text-lg"><strong class="w-48 inline-block">Tonnage:</strong> <span id="print-tonnage"></span></p>
+            <p class="mb-2 text-lg"><strong class="w-48 inline-block">FSC (%):</strong> <span id="print-fsc"></span></p>
+            <hr class="my-4">
+            <p class="mb-2 text-lg" id="print-your-rate-row"><strong class="w-48 inline-block"></strong> <span id="print-your-rate"></span></p>
+            <p class="mb-2 text-lg" id="print-offer-row"><strong class="w-48 inline-block"></strong> <span id="print-offer"></span></p>
+            <hr class="my-4">
+            <p class="mb-2 text-lg"><strong class="w-48 inline-block">FSC Total:</strong> <span id="print-fsc-total"></span></p>
+            <p class="text-xl font-bold mt-4"><strong class="w-48 inline-block">Final Total:</strong> <span id="print-final-total"></span></p>
+        </div>
+    </div>
+    
+    <textarea id="copySource" class="sr-only"></textarea>
     
     <script>
         // --- DOM Element Selection ---
@@ -154,17 +260,195 @@
         const primaryOutput = document.getElementById('primaryOutput');
         const fscTotal = document.getElementById('fscTotal');
         const finalTotal = document.getElementById('finalTotal');
-        // ... other selectors
+        const copyButton = document.getElementById('copyButton');
+        const resetButton = document.getElementById('resetButton');
+        const printButton = document.getElementById('printButton');
+        const emailButton = document.getElementById('emailButton');
+        const copyNotification = document.getElementById('copyNotification');
+        const copySource = document.getElementById('copySource');
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+        const transitionCanvas = document.getElementById('transition-canvas');
+        const mainTitle = document.getElementById('main-title');
         
-        // ... other variables and functions
+        // Menu Elements
+        const openMenuBtn = document.getElementById('open-menu-btn');
+        const closeMenuBtn = document.getElementById('close-menu-btn');
+        const sideMenu = document.getElementById('side-menu');
+        const menuOverlay = document.getElementById('menu-overlay');
+        const mainMenu = document.getElementById('main-menu');
+        const historyView = document.getElementById('history-view');
+        const feedbackView = document.getElementById('feedback-view');
+        const historyMenuBtn = document.getElementById('history-menu-btn');
+        const feedbackMenuBtn = document.getElementById('feedback-menu-btn');
+        const backToMenuHist = document.getElementById('back-to-menu-hist');
+        const backToMenuFeed = document.getElementById('back-to-menu-feed');
+        const historyList = document.getElementById('history-list');
+        const clearHistoryBtn = document.getElementById('clear-history-btn');
+        const feedbackForm = document.getElementById('feedback-form');
+        const personalCalcCounter = document.getElementById('personal-calc-counter');
+
+        // Mode Selector Elements
+        const modeSelectorContainer = document.getElementById('mode-selector-container');
+        const modeSlider = document.getElementById('mode-slider');
+        const modeButtons = Array.from(modeSelectorContainer.querySelectorAll('.mode-btn'));
+
         let currentMode = 'generateQuote';
         let calculationHistory = JSON.parse(localStorage.getItem('thompsonCalcHistory')) || [];
         let personalCalcCount = parseInt(localStorage.getItem('thompsonPersonalCalcCount')) || 0;
 
+        // --- Konami Code & Sound Logic ---
+        const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        let konamiIndex = 0;
 
-        // --- PC*MILER API INTEGRATION ---
+        async function playRetroMusic() {
+            await Tone.start();
+            const synth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "square" },
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0.2, release: 0.1 }
+            }).toDestination();
+            
+            const now = Tone.now();
+            synth.triggerAttackRelease("C#3", "8n", now);
+            synth.triggerAttackRelease("G#2", "8n", now + 0.25);
+            synth.triggerAttackRelease("C#3", "8n", now + 0.5);
+            synth.triggerAttackRelease("G#2", "8n", now + 0.75);
+            synth.triggerAttackRelease("C#3", "8n", now + 1);
+            synth.triggerAttackRelease("F2", "8n", now + 1.25);
+            synth.triggerAttackRelease("C#3", "8n", now + 1.5);
+            synth.triggerAttackRelease("F2", "8n", now + 1.75);
+        }
         
-        // Your provided API Key is now embedded here.
+        async function playPowerDownSound() {
+            await Tone.start();
+            const synth = new Tone.Synth({
+                oscillator: { type: "sawtooth" },
+                envelope: { attack: 0.01, decay: 0.5, sustain: 0, release: 0.1 }
+            }).toDestination();
+            synth.triggerAttackRelease("C4", "4n");
+            synth.frequency.rampTo("C2", 0.5);
+        }
+
+        function runAcidRain() {
+            transitionCanvas.classList.remove('hidden');
+            const ctx = transitionCanvas.getContext('2d');
+            let w = transitionCanvas.width = window.innerWidth;
+            let h = transitionCanvas.height = window.innerHeight;
+            let cols = Math.floor(w / 20) + 1;
+            let ypos = Array(cols).fill(0);
+
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, w, h);
+
+            let animFrame;
+            function matrix() {
+                ctx.fillStyle = '#0001';
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = '#4ade80';
+                ctx.font = '15pt monospace';
+
+                ypos.forEach((y, ind) => {
+                    const text = String.fromCharCode(Math.random() * 128);
+                    const x = ind * 20;
+                    ctx.fillText(text, x, y);
+                    if (y > 100 + Math.random() * 10000) ypos[ind] = 0;
+                    else ypos[ind] = y + 20;
+                });
+            }
+            animFrame = setInterval(matrix, 50);
+            
+            setTimeout(() => {
+                clearInterval(animFrame);
+                let opacity = 1;
+                const fadeOut = setInterval(() => {
+                    ctx.fillStyle = `rgba(0,0,0,${opacity * 0.1})`;
+                    ctx.fillRect(0, 0, w, h);
+                    opacity -= 0.1;
+                    if (opacity <= 0) {
+                        clearInterval(fadeOut);
+                        transitionCanvas.classList.add('hidden');
+                    }
+                }, 50);
+            }, 2000);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === konamiCode[konamiIndex]) {
+                konamiIndex++;
+                if (konamiIndex === konamiCode.length) {
+                    const isRetro = document.body.classList.toggle('retro-mode');
+                    if (isRetro) {
+                        runAcidRain();
+                        playRetroMusic();
+                    } else {
+                        playPowerDownSound();
+                    }
+                    konamiIndex = 0;
+                }
+            } else {
+                konamiIndex = 0;
+            }
+        });
+        
+        // --- Truck Horn Easter Egg ---
+        let hornClickCount = 0;
+        let hornTimeout;
+        mainTitle.addEventListener('click', async () => {
+            clearTimeout(hornTimeout);
+            hornClickCount++;
+            if (hornClickCount === 5) {
+                await Tone.start();
+                const horn = new Tone.Oscillator(185, "sawtooth").toDestination();
+                horn.volume.value = -12;
+                horn.start().stop("+0.8");
+                hornClickCount = 0;
+            }
+            hornTimeout = setTimeout(() => { hornClickCount = 0; }, 2000);
+        });
+
+        // --- Dark Mode Logic ---
+        function updateThemeIcon(isDarkMode) {
+            themeToggleDarkIcon.classList.toggle('hidden', !isDarkMode);
+            themeToggleLightIcon.classList.toggle('hidden', isDarkMode);
+        }
+
+        themeToggleBtn.addEventListener('click', function() {
+            document.documentElement.classList.toggle('dark');
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            updateThemeIcon(isDarkMode);
+        });
+
+        // --- Menu Logic ---
+        function openMenu() {
+            sideMenu.classList.remove('-translate-x-full');
+            menuOverlay.classList.remove('hidden');
+        }
+
+        function closeMenu() {
+            sideMenu.classList.add('-translate-x-full');
+            menuOverlay.classList.add('hidden');
+            mainMenu.classList.remove('hidden');
+            historyView.classList.add('hidden');
+            feedbackView.classList.add('hidden');
+        }
+
+        openMenuBtn.addEventListener('click', openMenu);
+        closeMenuBtn.addEventListener('click', closeMenu);
+        menuOverlay.addEventListener('click', closeMenu);
+
+        historyMenuBtn.addEventListener('click', (e) => { e.preventDefault(); mainMenu.classList.add('hidden'); historyView.classList.remove('hidden'); renderHistory(); });
+        feedbackMenuBtn.addEventListener('click', (e) => { e.preventDefault(); mainMenu.classList.add('hidden'); feedbackView.classList.remove('hidden'); });
+        backToMenuHist.addEventListener('click', () => { historyView.classList.add('hidden'); mainMenu.classList.remove('hidden'); });
+        backToMenuFeed.addEventListener('click', () => { feedbackView.classList.add('hidden'); mainMenu.classList.remove('hidden'); });
+
+        // --- Counter Logic ---
+        function updatePersonalCounterDisplay() {
+            personalCalcCounter.textContent = personalCalcCount.toLocaleString();
+        }
+        
+        // --- PC*MILER API INTEGRATION ---
         const PCMILER_API_KEY = 'C9EC4E502D8E6349AB91A8FF5BA8C66F';
         
         async function getAndCalculateMiles() {
@@ -186,9 +470,7 @@
             try {
                 const response = await fetch(apiUrl, {
                     method: 'GET',
-                    headers: {
-                        'Authorization': PCMILER_API_KEY
-                    }
+                    headers: { 'Authorization': PCMILER_API_KEY }
                 });
 
                 if (!response.ok) {
@@ -196,7 +478,6 @@
                 }
 
                 const data = await response.json();
-
                 const totalMiles = data && data[0] && data[0].TMiles;
 
                 if (typeof totalMiles !== 'number') {
@@ -208,31 +489,24 @@
 
             } catch (error) {
                 console.error("Error fetching mileage:", error);
-                alert("Failed to calculate miles. Please check the locations and your API key.");
+                alert("Failed to calculate miles. Please check the locations and try again.");
                 milesInput.value = '';
             } finally {
                 calculateMilesBtn.disabled = false;
-                calculateMilesBtn.textContent = 'Calculate Miles';
+                calculateMilesBtn.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13V7m0 13a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h2a2 2 0 012 2zm10 0l5.447-2.724A1 1 0 0021 16.382V5.618a1 1 0 00-1.447-.894L15 7m0 13V7m0 13a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2h-2a2 2 0 00-2 2z"></path></svg> Calculate Miles`;
             }
         }
-        
-        // --- History Logic (MODIFIED) ---
+
+        // --- History Logic ---
         function saveCalculation() {
             const pInput = parseFloat(primaryInput.value) || 0;
             const miles = parseFloat(milesInput.value) || 0;
             if (pInput > 0 && miles > 0) {
-                const calculation = {
-                    mode: currentMode,
-                    primaryInput: primaryInput.value,
-                    miles: milesInput.value,
-                    tonnage: tonnageInput.value,
-                    fsc: fscInput.value,
-                    origin: originInput.value,
-                    pickup: pickupInput.value,
-                    delivery: deliveryInput.value,
-                    timestamp: new Date().toISOString()
+                const calculation = { 
+                    mode: currentMode, primaryInput: primaryInput.value, miles: milesInput.value, tonnage: tonnageInput.value, fsc: fscInput.value, 
+                    origin: originInput.value, pickup: pickupInput.value, delivery: deliveryInput.value, 
+                    timestamp: new Date().toISOString() 
                 };
-                
                 if (calculationHistory.length > 0) {
                     const lastCalc = calculationHistory[0];
                     if (lastCalc.mode === calculation.mode && lastCalc.primaryInput === calculation.primaryInput && lastCalc.miles === calculation.miles && lastCalc.tonnage === calculation.tonnage && lastCalc.fsc === calculation.fsc) return;
@@ -243,10 +517,27 @@
                 
                 personalCalcCount++;
                 localStorage.setItem('thompsonPersonalCalcCount', personalCalcCount);
-                // updatePersonalCounterDisplay(); // Assuming this function exists elsewhere in your full script
+                updatePersonalCounterDisplay();
             }
         }
-        
+
+        function renderHistory() {
+            historyList.innerHTML = '';
+            if (calculationHistory.length === 0) {
+                historyList.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400">No recent calculations.</p>`;
+                return;
+            }
+            calculationHistory.forEach((calc, index) => {
+                const { yourRateValue, offerValue } = getSummaryText(calc);
+                const modeKey = calc.mode.replace('generate', '').replace('calculateFrom', '').toLowerCase();
+                const button = document.createElement('button');
+                button.className = 'w-full text-left p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700';
+                button.innerHTML = `<div class="font-bold text-gray-800 dark:text-gray-200">${modeButtons.find(b => b.dataset.mode.toLowerCase().includes(modeKey)).textContent}</div><div class="text-sm text-gray-600 dark:text-gray-400">Rate: ${yourRateValue} | Offer: ${offerValue}</div>`;
+                button.onclick = () => { loadFromHistory(index); closeMenu(); };
+                historyList.appendChild(button);
+            });
+        }
+
         function loadFromHistory(index) {
             const calc = calculationHistory[index];
             setMode(calc.mode);
@@ -258,6 +549,77 @@
             pickupInput.value = calc.pickup || '';
             deliveryInput.value = calc.delivery || '';
             calculate();
+        }
+
+        clearHistoryBtn.addEventListener('click', () => { calculationHistory = []; localStorage.removeItem('thompsonCalcHistory'); renderHistory(); });
+
+        // --- Feedback Logic ---
+        feedbackForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = document.getElementById('feedback-message').value;
+            if (message.trim()) {
+                const recipient = 'mgardner@thompsontrans.net';
+                const subject = 'Feedback for Freight Calculator';
+                const body = encodeURIComponent(message);
+                window.location.href = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${body}`;
+                feedbackForm.innerHTML = `<p class="text-center text-lg text-green-600 dark:text-green-400">Opening your email client...</p>`;
+                setTimeout(() => {
+                    closeMenu();
+                    feedbackForm.innerHTML = `<textarea id="feedback-message" placeholder="Your feedback..." rows="5" class="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700"></textarea><button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Send</button>`;
+                }, 2500);
+            }
+        });
+
+        // --- Main App Logic ---
+        function setMode(newMode) {
+            currentMode = newMode;
+            
+            const activeButton = modeButtons.find(btn => btn.dataset.mode === newMode);
+            
+            modeButtons.forEach(btn => btn.classList.remove('active'));
+            activeButton.classList.add('active');
+
+            const { offsetLeft, offsetWidth } = activeButton;
+            modeSlider.style.width = `${offsetWidth}px`;
+            modeSlider.style.transform = `translateX(${offsetLeft - 4}px)`;
+
+            emailButton.classList.toggle('hidden', newMode !== 'generateQuote');
+            printButton.classList.toggle('hidden', newMode === 'generateQuote');
+
+            const isFlatMode = newMode === 'calculateFromFlat';
+            tonnageInput.disabled = isFlatMode;
+            tonnageInput.classList.toggle('opacity-50', isFlatMode);
+            tonnageInput.classList.toggle('cursor-not-allowed', isFlatMode);
+
+            form.reset();
+            originInput.value = ''; pickupInput.value = ''; deliveryInput.value = '';
+            tonnageInput.value = isFlatMode ? '' : 23;
+            calculate();
+            
+            primaryInputLabel.classList.add('opacity-0');
+            primaryOutputLabel.classList.add('opacity-0');
+
+            setTimeout(() => {
+                switch (newMode) {
+                    case 'generateQuote':
+                        primaryInputLabel.textContent = 'Your Rate ($/Mile)';
+                        primaryOutputLabel.textContent = 'Quote ($/Ton)';
+                        primaryInput.placeholder = 'e.g., 3.50';
+                        break;
+                    case 'calculateFromTon':
+                        primaryInputLabel.textContent = 'Offer ($/Ton)';
+                        primaryOutputLabel.textContent = 'Your Rate ($/Mile)';
+                        primaryInput.placeholder = 'e.g., 150.00';
+                        break;
+                    case 'calculateFromFlat':
+                        primaryInputLabel.textContent = 'Flat Rate Offer ($)';
+                        primaryOutputLabel.textContent = 'Your Rate ($/Mile)';
+                        primaryInput.placeholder = 'e.g., 3000.00';
+                        break;
+                }
+                primaryInputLabel.classList.remove('opacity-0');
+                primaryOutputLabel.classList.remove('opacity-0');
+            }, 150);
         }
 
         function calculate() {
@@ -279,27 +641,123 @@
                 case 'calculateFromFlat': pOutput = miles > 0 ? total / miles : 0; break;
             }
             
-            // Assuming animateValue function exists elsewhere
-            primaryOutput.value = pOutput.toFixed(2);
-            fscTotal.value = fscAmount.toFixed(2);
-            finalTotal.value = total.toFixed(2);
+            animateValue(primaryOutput, parseFloat(primaryOutput.value.replace(/,/g, '')) || 0, pOutput, 300);
+            animateValue(fscTotal, parseFloat(fscTotal.value.replace(/,/g, '')) || 0, fscAmount, 300);
+            animateValue(finalTotal, parseFloat(finalTotal.value.replace(/,/g, '')) || 0, total, 300);
         }
         
+        function animateValue(element, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const currentValue = progress * (end - start) + start;
+                element.value = currentValue > 0.005 ? currentValue.toFixed(2) : '';
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function getSummaryText(calcData = null) {
+            const data = calcData || { mode: currentMode, primaryInput: primaryInput.value, miles: milesInput.value, tonnage: tonnageInput.value, fsc: fscInput.value };
+            const pInput = parseFloat(data.primaryInput) || 0;
+            const miles = parseFloat(data.miles) || 0;
+            const tonnage = parseFloat(data.tonnage) || 23;
+            const fscPercent = parseFloat(data.fsc) || 0;
+            let lineHaul = 0, pOutput = 0;
+            switch (data.mode) {
+                case 'generateQuote': lineHaul = pInput * miles; break;
+                case 'calculateFromTon': lineHaul = pInput * tonnage; break;
+                case 'calculateFromFlat': lineHaul = pInput; break;
+            }
+            const total = lineHaul * (1 + fscPercent / 100);
+            switch (data.mode) {
+                case 'generateQuote': pOutput = total > 0 && tonnage > 0 ? total / tonnage : 0; break;
+                case 'calculateFromTon':
+                case 'calculateFromFlat': pOutput = miles > 0 ? total / miles : 0; break;
+            }
+            let yourRateLabel, yourRateValue, offerLabel, offerValue;
+            if (data.mode === 'generateQuote') {
+                yourRateLabel = 'Your Rate:';
+                yourRateValue = `$${pInput.toFixed(2)} / mile`;
+                offerLabel = 'Quote to Customer:';
+                offerValue = `$${pOutput.toFixed(2)} / ton`;
+            } else {
+                yourRateLabel = 'Your Calculated Rate:';
+                yourRateValue = `$${pOutput.toFixed(2)} / mile`;
+                offerLabel = 'Customer Offer:';
+                if (data.mode === 'calculateFromTon') {
+                    offerValue = `$${pInput.toFixed(2)} / ton`;
+                } else {
+                    offerValue = `$${pInput.toFixed(2)} (Flat)`;
+                }
+            }
+            return { yourRateLabel, yourRateValue, offerLabel, offerValue };
+        }
+
         // --- Event Listeners ---
-        [primaryInput, tonnageInput, fscInput].forEach(input => input.addEventListener('input', calculate));
+        [primaryInput, milesInput, tonnageInput, fscInput].forEach(input => input.addEventListener('input', calculate));
+        
+        modeButtons.forEach(button => {
+            button.addEventListener('click', () => setMode(button.dataset.mode));
+        });
         
         calculateMilesBtn.addEventListener('click', getAndCalculateMiles);
 
-        // resetButton listener assumed to exist elsewhere
-        document.getElementById('resetButton').addEventListener('click', () => { 
+        resetButton.addEventListener('click', () => { 
             form.reset(); 
-            originInput.value = '';
-            pickupInput.value = '';
-            deliveryInput.value = '';
+            originInput.value = ''; pickupInput.value = ''; deliveryInput.value = '';
             tonnageInput.value = 23;
             calculate();
         });
 
+        let saveTimeout;
+        form.addEventListener('input', () => { clearTimeout(saveTimeout); saveTimeout = setTimeout(saveCalculation, 1500); });
+
+        copyButton.addEventListener('click', () => {
+            const { yourRateLabel, yourRateValue, offerLabel, offerValue } = getSummaryText();
+            const activeBtn = modeButtons.find(b => b.dataset.mode === currentMode);
+            const summary = `Freight Calculation Summary:\n- Mode: ${activeBtn.textContent}\n- Miles: ${milesInput.value || 'N/A'}\n- Tonnage: ${tonnageInput.value || 'N/A'}\n- FSC: ${fscInput.value || 0}%\n---\n- Final Total: $${finalTotal.value || '0.00'}\n- FSC Amount: $${fscTotal.value || '0.00'}\n---\n- ${yourRateLabel} ${yourRateValue}\n- ${offerLabel} ${offerValue}`.trim();
+            copySource.value = summary;
+            copySource.select();
+            document.execCommand('copy');
+            copyNotification.textContent = 'Copied to clipboard!';
+            copyNotification.style.opacity = '1';
+            setTimeout(() => { copyNotification.style.opacity = '0'; }, 2000);
+        });
+
+        printButton.addEventListener('click', () => {
+            const { yourRateLabel, yourRateValue, offerLabel, offerValue } = getSummaryText();
+            const activeBtn = modeButtons.find(b => b.dataset.mode === currentMode);
+            document.getElementById('print-date').textContent = new Date().toLocaleDateString();
+            document.getElementById('print-mode').textContent = activeBtn.textContent;
+            document.getElementById('print-miles').textContent = milesInput.value || 'N/A';
+            document.getElementById('print-tonnage').textContent = tonnageInput.value || 'N/A';
+            document.getElementById('print-fsc').textContent = `${fscInput.value || 0}%`;
+            document.querySelector('#print-your-rate-row strong').textContent = yourRateLabel;
+            document.getElementById('print-your-rate').textContent = yourRateValue;
+            document.querySelector('#print-offer-row strong').textContent = offerLabel;
+            document.getElementById('print-offer').textContent = offerValue;
+            document.getElementById('print-fsc-total').textContent = `$${fscTotal.value || '0.00'}`;
+            document.getElementById('print-final-total').textContent = `$${finalTotal.value || '0.00'}`;
+            window.print();
+        });
+
+        emailButton.addEventListener('click', () => {
+            const { offerValue } = getSummaryText();
+            const subject = "Freight Quote";
+            const body = `Hello,\n\nFollowing up on your request, here is our all-inclusive quote for the lane:\n\nRate: ${offerValue}\n\nPlease let us know if you have any questions.\n\nThank you,\nThompson Transportation`;
+            
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailtoLink;
+        });
+
+        // --- Initial Setup ---
+        updatePersonalCounterDisplay();
+        setMode('generateQuote');
+        updateThemeIcon(document.documentElement.classList.contains('dark'));
     </script>
 </body>
 </html>
