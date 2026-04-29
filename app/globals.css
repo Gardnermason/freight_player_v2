@@ -1,26 +1,180 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-roboto: 'Roboto', sans-serif;
+  --font-bungee: 'Bungee', sans-serif;
+  --font-caveat: 'Caveat', cursive;
+  --font-merriweather: 'Merriweather', serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ===== Body ===== */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Roboto', sans-serif;
+  background-color: #121212;
+  color: #FFFFFF;
+}
+
+/* ===== Typography ===== */
+.title-your {
+  font-family: 'Bungee', sans-serif;
+  color: #E5173F;
+  line-height: 1;
+}
+
+.title-calc {
+  font-family: 'Caveat', cursive;
+  color: #FFFFFF;
+  line-height: 1;
+}
+
+.section-title {
+  font-family: 'Merriweather', serif;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.input-label-calc {
+  font-family: 'Merriweather', serif;
+  font-size: 15px;
+  color: #FFFFFF;
+  white-space: nowrap;
+}
+
+.output-label-calc {
+  font-family: 'Merriweather', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #FFFFFF;
+  white-space: nowrap;
+}
+
+/* ===== Form Inputs ===== */
+.form-input {
+  background-color: #282828;
+  color: #FFFFFF;
+  border-color: #535353;
+}
+.form-input::placeholder {
+  color: #b3b3b3;
+}
+.form-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.4);
+  border-color: #0EA5E9 !important;
+}
+
+.editable-field {
+  background-color: #282828;
+  color: #FFFFFF;
+  border-color: #535353;
+}
+
+.output-field {
+  background-color: #0c3a52;
+  font-weight: bold;
+  color: #FFFFFF;
+  border-color: #535353;
+}
+
+/* ===== Mode Selector ===== */
+.mode-container {
+  background-color: #282828;
+}
+
+.mode-btn-inactive {
+  background-color: #282828;
+  color: #b3b3b3;
+}
+.mode-btn-inactive:hover {
+  color: #FFFFFF;
+}
+
+.mode-btn-active {
+  color: #FFFFFF;
+}
+
+.mode-slider-bg {
+  background-color: #0EA5E9;
+}
+
+/* ===== Action Buttons ===== */
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: white;
+  transition: all 0.15s ease-in-out;
+}
+.action-btn:hover {
+  transform: scale(1.04);
+  filter: brightness(1.1);
+}
+.action-btn:active {
+  transform: scale(1);
+}
+.btn-email { background-color: #0EA5E9; }
+.btn-email:hover { background-color: #0284C7; }
+.btn-print { background-color: #1DB954; }
+.btn-print:hover { background-color: #1aa34a; }
+.btn-copy  { background-color: #0EA5E9; }
+.btn-copy:hover  { background-color: #0284C7; }
+.btn-reset { background-color: #E5173F; }
+.btn-reset:hover { background-color: #c0132f; }
+
+/* ===== Google Places Autocomplete Dropdown ===== */
+.pac-container {
+  z-index: 10000 !important;
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  font-family: 'Roboto', sans-serif;
+  background-color: #282828;
+  border: 1px solid #535353;
+}
+.pac-item {
+  color: #FFFFFF;
+  border-top-color: #535353;
+}
+.pac-item:hover,
+.pac-item-selected {
+  background-color: #383838;
+}
+.pac-item-query {
+  color: #FFFFFF;
+}
+.pac-matched {
+  color: #0EA5E9;
+}
+.pac-icon {
+  filter: invert(1) brightness(0.7);
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #121212;
+}
+::-webkit-scrollbar-thumb {
+  background: #535353;
+  border-radius: 3px;
+}
+
+/* ===== Print Styles ===== */
+.print-label {
+  font-family: 'Merriweather', serif;
+  font-weight: 700;
+}
+
+@media print {
+  body, html { background-color: white !important; color: black !important; }
+  .app-shell { display: none !important; }
+  .print-area { display: block !important; position: absolute; top: 0; left: 0; width: 100%; }
+  .print-area-content { background-color: white !important; color: black !important; }
+  .print-area-content * { color: black !important; }
 }

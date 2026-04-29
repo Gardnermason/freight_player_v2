@@ -1,12 +1,5 @@
 import type { NextConfig } from 'next';
 
-const nextConfig: NextConfig = {
-  async rewrites() {
-    return [
-      // Serve our static HTML for the root path
-      { source: '/', destination: '/index.html' },
-    ];
-  },
-};
+const nextConfig: NextConfig = {};
 
 export default nextConfig;

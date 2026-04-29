@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import FreightCalculator from './components/FreightCalculator';
 
 export default function Home() {
-  redirect('/index.html');
+  return <FreightCalculator />;
 }
