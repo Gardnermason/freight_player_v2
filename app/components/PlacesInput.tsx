@@ -13,17 +13,14 @@ interface Props {
 export default function PlacesInput({ value, onChange, placeholder, className }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
-  const isSettingRef = useRef(false);
 
   const handlePlaceSelect = useCallback(() => {
     const ac = autocompleteRef.current;
     if (!ac) return;
     const place = ac.getPlace();
     if (place?.formatted_address) {
-      isSettingRef.current = true;
       onChange(place.formatted_address);
     } else if (place?.name) {
-      isSettingRef.current = true;
       onChange(place.name);
     }
   }, [onChange]);
@@ -57,12 +54,7 @@ export default function PlacesInput({ value, onChange, placeholder, className }:
       ref={inputRef}
       type="text"
       value={value}
-      onChange={(e) => {
-        if (!isSettingRef.current) {
-          onChange(e.target.value);
-        }
-        isSettingRef.current = false;
-      }}
+      onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       className={className}
       autoComplete="off"
