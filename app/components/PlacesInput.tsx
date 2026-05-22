@@ -3,6 +3,10 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { loadMapsApi } from '../lib/load-maps';
 
+function stripCountrySuffix(addr: string): string {
+  return addr.replace(/,?\s*(USA|United States(?: of America)?)\s*$/i, '').trim();
+}
+
 interface Props {
   value: string;
   onChange: (value: string) => void;
@@ -19,9 +23,9 @@ export default function PlacesInput({ value, onChange, placeholder, className }:
     if (!ac) return;
     const place = ac.getPlace();
     if (place?.formatted_address) {
-      onChange(place.formatted_address);
+      onChange(stripCountrySuffix(place.formatted_address));
     } else if (place?.name) {
-      onChange(place.name);
+      onChange(stripCountrySuffix(place.name));
     }
   }, [onChange]);
 
